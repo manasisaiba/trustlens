@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "personas": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Short persona label, e.g. 'Emergency patient'"},
+          "background": {"type": "string", "description": "1-2 sentences of customer background"},
+          "objective": {"type": "string", "description": "What the customer wants to achieve"},
+          "taskDescription": {"type": "string", "description": "The concrete task to attempt on the website"},
+          "successCriteria": {"type": "string", "description": "Observable condition that means the task succeeded"},
+          "lookFor": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 8}
+        },
+        "required": ["name", "background", "objective", "taskDescription", "successCriteria", "lookFor"]
+      }
+    }
+  },
+  "required": ["personas"]
+}

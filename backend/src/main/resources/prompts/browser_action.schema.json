@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "observation": {"type": "string", "description": "Factual note of what is visible on the current page relevant to the task"},
+    "reasoning": {"type": "string", "description": "Why this next action was chosen"},
+    "action": {"type": "string", "enum": ["click_element", "navigate_to_page", "fill_form", "scroll", "extract_visible_text", "finish"]},
+    "elementId": {"type": "string", "description": "Element id for click_element"},
+    "url": {"type": "string", "description": "Absolute URL for navigate_to_page"},
+    "fields": {
+      "type": "array",
+      "items": {"type": "object", "properties": {"elementId": {"type": "string"}, "value": {"type": "string"}}, "required": ["elementId", "value"]}
+    },
+    "outcome": {"type": "string", "enum": ["success", "partial", "failed"], "description": "Required for finish"},
+    "summary": {"type": "string", "description": "For finish: what was found or what was missing"}
+  },
+  "required": ["observation", "reasoning", "action"]
+}

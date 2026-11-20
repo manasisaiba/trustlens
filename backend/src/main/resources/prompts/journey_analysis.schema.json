@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "outcome": {"type": "string", "enum": ["success", "partial", "failed"]},
+    "summary": {"type": "string"},
+    "frictionPoints": {
+      "type": "array",
+      "items": {"type": "object", "properties": {"description": {"type": "string"}, "steps": {"type": "array", "items": {"type": "integer"}}}, "required": ["description", "steps"]}
+    }
+  },
+  "required": ["outcome", "summary", "frictionPoints"]
+}

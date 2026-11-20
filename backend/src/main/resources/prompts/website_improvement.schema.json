@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "html": {"type": "string", "description": "HTML body fragment"},
+    "css": {"type": "string"},
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "relatedFinding": {"type": "string"},
+          "needsVerification": {"type": "boolean"}
+        },
+        "required": ["title", "description", "needsVerification"]
+      }
+    },
+    "verificationNotes": {"type": "string", "description": "List of facts the owner must verify before publishing"}
+  },
+  "required": ["html", "css", "changes", "verificationNotes"]
+}

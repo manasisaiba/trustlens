@@ -1,0 +1,11 @@
+.env
+node_modules/
+.next/
+target/
+data/
+e2e/screens/
+:cat >> .gitignore <<'EOF'
+
+# Let's Encrypt certificates and challenge files
+/infra/certbot/conf/
+/infra/certbot/www/

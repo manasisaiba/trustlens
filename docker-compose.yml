@@ -1,0 +1,84 @@
+name: trustlens
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trustlens
+      POSTGRES_USER: trustlens
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trustlens -d trustlens"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    shm_size: 1gb
+    environment:
+      SCREENSHOT_DIR: /data/screenshots
+      MAX_SESSIONS: ${WORKER_MAX_SESSIONS:-8}
+      ALLOW_PRIVATE_TARGETS: "false"
+    volumes:
+      - screenshots:/data/screenshots
+    networks: [internal, egress]
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+      worker: { condition: service_healthy }
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/trustlens
+      DATABASE_USER: trustlens
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-5}
+      WORKER_URL: http://worker:4000
+      SCREENSHOT_DIR: /data/screenshots
+      MAX_ACTIONS_PER_JOURNEY: ${MAX_ACTIONS_PER_JOURNEY:-8}
+      JOURNEY_TIMEOUT_SECONDS: ${JOURNEY_TIMEOUT_SECONDS:-180}
+      PARALLEL_JOURNEYS: ${PARALLEL_JOURNEYS:-4}
+      ALLOWED_ORIGINS: ${PUBLIC_URL:-http://localhost}
+    volumes:
+      - screenshots:/data/screenshots:ro
+    networks: [internal, egress]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_URL: http://backend:8080
+    restart: unless-stopped
+    depends_on: [backend]
+    networks: [internal]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on: [frontend, backend]
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/nginx/proxy_common.conf:/etc/nginx/proxy_common.conf:ro
+      - ./infra/certbot/www:/var/www/certbot:ro
+      - ./infra/certbot/conf:/etc/letsencrypt:ro
+    networks: [internal, egress]
+
+volumes:
+  pgdata:
+  screenshots:
+
+networks:
+  internal:
+    internal: true   # db / worker / backend / frontend are not reachable from outside
+  egress: {}         # outbound internet for the worker (browsing) and backend (Claude API)

@@ -1,0 +1,44 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: trustlens-backend
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/trustlens}
+    username: ${DATABASE_USER:trustlens}
+    password: ${DATABASE_PASSWORD:trustlens}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+trustlens:
+  anthropic-api-key: ${ANTHROPIC_API_KEY:}
+  anthropic-model: ${ANTHROPIC_MODEL:claude-sonnet-4-5}
+  anthropic-base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+  worker-url: ${WORKER_URL:http://localhost:4000}
+  screenshot-dir: ${SCREENSHOT_DIR:./data/screenshots}
+  max-actions-per-journey: ${MAX_ACTIONS_PER_JOURNEY:8}
+  journey-timeout-seconds: ${JOURNEY_TIMEOUT_SECONDS:180}
+  parallel-journeys: ${PARALLEL_JOURNEYS:4}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+  allow-private-targets: ${ALLOW_PRIVATE_TARGETS:false}
